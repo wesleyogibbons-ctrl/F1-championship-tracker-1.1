@@ -1,0 +1,34 @@
+:root { --bg: #050505; --track: #111; --text: #eee; }
+body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; }
+header { text-align: center; padding: 20px; border-bottom: 2px solid #222; }
+
+.container { display: flex; justify-content: space-around; padding: 20px; height: 85vh; }
+.track-wrapper { width: 45%; text-align: center; }
+
+.track {
+    position: relative;
+    height: 100%;
+    background: var(--track);
+    border: 1px solid #333;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.car-node {
+    position: absolute;
+    width: 120px;
+    transition: all 1.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.car-node img { width: 100px; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.8)); }
+.car-node .label { 
+    font-size: 11px; font-weight: bold; background: rgba(0,0,0,0.7); 
+    padding: 2px 5px; border-radius: 3px; margin-top: -5px;
+}
+
+.line { position: absolute; width: 100%; font-size: 10px; color: #444; text-transform: uppercase; }
+.finish { top: 5px; border-bottom: 1px dashed #333; }
+.start { bottom: 5px; border-top: 1px dashed #333; }
