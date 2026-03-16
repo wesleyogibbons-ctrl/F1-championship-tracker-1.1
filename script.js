@@ -70,7 +70,7 @@ function renderTrack(containerId, data, type) {
         }
 
         // Calculate X based on the best lane found (spaced out across the width)
-        const xPos = 5 + (bestLane * 22); 
+        const xPos = 5 + (bestLane * 25); 
 
         node.style.transform = `translate(${xPos}%, ${yPos}px)`;
         node.innerHTML = `
