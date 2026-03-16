@@ -27,32 +27,57 @@ async function updateAll() {
 
 function renderTrack(containerId, data, type) {
     const container = document.getElementById(containerId);
-    const trackHeight = container.parentElement.offsetHeight - 80;
+    const trackHeight = container.parentElement.offsetHeight - 100;
     const maxPoints = Math.max(...data.map(item => parseFloat(item.points)));
 
-    data.forEach((item, index) => {
+    // 1. Sort by points (High to Low) to process them in order
+    const sortedData = [...data].sort((a, b) => b.points - a.points);
+    
+    // 2. We will track the "last occupied position" for each lane
+    // This allows us to put cars side-by-side if they are too close vertically
+    let lanes = [0, 0, 0, 0]; // 4 lanes to give even more room
+
+    sortedData.forEach((item, index) => {
         const pts = parseFloat(item.points);
         const teamId = type === 'Driver' ? item.Constructors[0].constructorId : item.Constructor.constructorId;
         const name = type === 'Driver' ? item.Driver.familyName : item.Constructor.name;
 
-        let node = document.getElementById(`${type}-${index}`);
+        // Proportional Y calculation
+        const yPos = maxPoints > 0 ? ((maxPoints - pts) / maxPoints) * trackHeight : trackHeight;
+
+        // 3. COLLISION LOGIC: Find the first lane that isn't "blocked" at this Y height
+        let bestLane = 0;
+        const buffer = 70; // Height of the car + label in pixels
+
+        for (let i = 0; i < lanes.length; i++) {
+            if (yPos > lanes[i] + buffer || yPos < lanes[i] - buffer) {
+                bestLane = i;
+                break;
+            } else {
+                // If this lane is full, try the next one
+                bestLane = (i + 1) % lanes.length;
+            }
+        }
+        lanes[bestLane] = yPos; // Mark this height as "taken" in this lane
+
+        // 4. Update or Create the element
+        let node = document.getElementById(`${type}-${item.Driver?.driverId || item.Constructor?.constructorId}`);
         if (!node) {
             node = document.createElement('div');
-            node.id = `${type}-${index}`;
+            node.id = `${type}-${item.Driver?.driverId || item.Constructor?.constructorId}`;
             node.className = 'car-node';
             container.appendChild(node);
         }
 
-        // Proportional Y Math
-        const yPos = maxPoints > 0 ? ((maxPoints - pts) / maxPoints) * trackHeight : 0;
-        
-        // Anti-Bunching X Math (3 columns)
-        const xPos = (index % 3) * 30 + 5; 
+        // Calculate X based on the best lane found (spaced out across the width)
+        const xPos = 5 + (bestLane * 22); 
 
         node.style.transform = `translate(${xPos}%, ${yPos}px)`;
         node.innerHTML = `
-            <img src="${ASSETS[teamId] || ASSETS['mclaren']}">
-            <div class="label">${name.toUpperCase()}: ${pts}</div>
+            <img src="${ASSETS[teamId] || ASSETS['mclaren']}" style="width: 80px;">
+            <div class="label" style="background: ${teamColors[teamId] || '#333'}">
+                ${name.toUpperCase()} (${pts})
+            </div>
         `;
     });
 }
